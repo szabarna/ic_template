@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css?family=Orbitron');
+
+:root {
+    font-size: 16px;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html, body, #root {
+  width: 100vw;
+  height: 100vh;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+.canvasContainer canvas {
+  position: fixed !important;
+  z-index: 1 !important;
+  border-radius: 0.75rem;
+}
+
+
+
+.canvasContainer {
+  width: 35vw;
+  max-width: 35vw;
+  min-width: 325px;
+  height: 100vh; 
+  position: relative;
+  right: 12.5vw;
+  bottom: 0rem;
+}
+
+.canvasSection {
+  position: absolute;
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  justify-content: end;
+  align-items: center;
+  background: linear-gradient(30deg, blue, 2.5%, rgba(55, 0, 55) 90%);  
+}
+
+
+
+
