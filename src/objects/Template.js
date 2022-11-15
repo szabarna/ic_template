@@ -1,291 +1,238 @@
-
-import React, { useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber"
-import * as THREE from 'three'
-import gsap from 'gsap'
+import { TextureLoader } from "three";
+import { useFrame } from "@react-three/fiber";
+import gsap from 'gsap';
 import { CustomEase } from "gsap/all";
-import FinalWatch from "./FinalWatch.js";
 
-const urls = [
-  './img/env.hdr', './img/env.hdr',
-  './img/env.hdr', './img/env.hdr',
-  './img/env.hdr', './img/env.hdr'
-];
-const envMap = new THREE.CubeTextureLoader().load(urls);
-const texture = new THREE.TextureLoader().load('./img/bg.jpg');
+gsap.registerPlugin(CustomEase);
 
-envMap.format = THREE.RGBFormat;
-
-gsap.registerPlugin(CustomEase)
-
-
-export default function Template({ ...props }) {
-
-
+export function Template(props) {
+  const { nodes, materials } = useGLTF("/template.glb");
+  const backTexture = new TextureLoader().load('./img/bg.jpg');
   const group = useRef();
-  const { nodes, materials } = useGLTF("/iceTemplate.glb");
-  // -  scene, animations
-  // const { actions } = useAnimations(animations, group);
-
-    // let mixer = new THREE.AnimationMixer(scene);
-    // animations.forEach((clip) => {
-    //     const action = mixer.clipAction(clip);
-    //     action.play();
-    // });
-
-  const templateGroup = useRef();
-
-  const iceCube = useRef();
-  const dirLight = useRef();
-  const ambLight = useRef();
-  const iceImg = useRef();
-  const frontPlain = useRef();
-
-
-
-  const leftText = useRef();
-  const topText = useRef();
-  const rightText = useRef();
-
-
-  const { camera, scene, gl } = useThree();
+  const pointer1 = useRef();
+  const pointer2 = useRef();
+  const icLogo = useRef();
 
   useEffect(() => {
-    
 
-    scene.children[0].traverse((obj) => {
-        if(obj.isMesh) {
-          
-          if(obj.material.map != undefined) {
-            
-            gl.initTexture(obj.material.map)
-            gl.initTexture(envMap);
-            gl.initTexture(texture);
-          }
-        }
-    })
+    gsap.to(group.current.rotation, {
+      y: "+=" + Math.PI * 2,
+      duration: 7.5,
+      repeat: -1,
+      repeatDelay: 12.5,
+      ease: CustomEase.create(
+        "custom",
+        "M0,0,C0,0,0.108,0.255,0.17,0.34,0.242,0.44,0.363,0.474,0.448,0.53,0.636,0.654,0.617,0.731,0.708,0.84,0.816,0.97,1,1,1,1"
+      ),
+    });
 
-  }, [])
-  
-  
-  
-  materials.backMaterial.map = texture;
+  }, []);
+  useFrame(({clock}) => {
+    icLogo.current.rotation.y = clock.getElapsedTime() * 0.5;
+    pointer1.current.rotation.x = -clock.getElapsedTime() * 0.5;
+    pointer2.current.rotation.x = -clock.getElapsedTime() * 0.25;
+  });
 
-  materials.backMaterial.roughness = 0.15;
-  materials.backMaterial.color = new THREE.Color(0, 0, 0.25);
-  materials.backMaterial.metalness = 0.65;
-
-  
- 
-  materials.frontMaterial.emmisive = new THREE.Color('#ff0000');
-  materials.frontMaterial.emmisiveIntensity = 15.0;
-  materials.frontMaterial.roughness = 0.2;
-  materials.frontMaterial.metalness = 0.75;
-
-  nodes.plainImg.material.transparent = true;
-  nodes.plainImg.material.opacity = 1;
-  nodes.plainImg.material.metalness = 1.0;
-  nodes.plainImg.material.roughness = 0.2;
-  nodes.plainImg.material.color = new THREE.Color('#aaaaaa');
-
-
-  nodes.leftText.material.color = new THREE.Color('#00a1ff');
-  nodes.leftText.material.roughness = 0.3;
-  nodes.leftText.material.metalness = 0.9;
-  
-
-   useFrame(({clock}, delta)=> {
-
-     iceCube.current.rotation.y = clock.getElapsedTime() * 0.35;
-
-   })
-
-   const tl = new gsap.timeline()
-  
   return (
-    <group ref={group} {...props} dispose={null}  >
-      <group name="Scene" rotation={[0, Math.PI / 2, 0]} position={[0, 0, 0]}>
-      
-        <group ref={ templateGroup } 
-        onPointerOver={(e)=> {
-          document.querySelector('.webgl').style.cursor = 'pointer'
-        }}
-        onPointerOut={(e)=> {
-          document.querySelector('.webgl').style.cursor = 'default'
-        }}
-        onClick={(e)=> {
-          
-          if(!tl.isActive()) {
-            tl.to(templateGroup.current.rotation, { y: "+=" + Math.PI * 2, duration: 5, ease: CustomEase.create("custom", "M0,0,C0,0,0.108,0.255,0.17,0.34,0.242,0.44,0.363,0.474,0.448,0.53,0.636,0.654,0.617,0.731,0.708,0.84,0.816,0.97,1,1,1,1")})
-             gsap.to(camera.position, { z: "-=" + 0.3, duration: 2.2, ease: "power1.inOut", onComplete: () => {
-              gsap.to(camera.position, { z: "+=" + 0.3, duration: 2.2, ease: "power1.inOut" })
-            } })
-            
-            
-            scene.traverse((obj) => {
-              if(obj.isGroup && obj.name === "Watch") {
-                gsap.to(obj.rotation, { y: "-=" + Math.PI * 2, duration: 5,  ease:  CustomEase.create("custom", "M0,0,C0,0,0.108,0.255,0.17,0.34,0.242,0.44,0.363,0.474,0.448,0.53,0.636,0.654,0.617,0.731,0.708,0.84,0.816,0.97,1,1,1,1")})
-              }
-
-             
-            })
-
-            
-          }
-         
-        }}
-        position={[0, 0, 0]}
-        >
-            
-          <mesh
-            name="backPlain"
-            castShadow
-            receiveShadow
-            geometry={nodes.backPlain.geometry}
-             material={materials.backMaterial}
-            // material={new THREE.MeshNormalMaterial()}
-          
-            position={[-0.2, 0, 0]}
-            rotation={[0, 0, -Math.PI / 2]}
-            scale={[0.38, 0.59, 0.25]}
-          >
-          
-          </mesh>
+    <group ref={group} {...props} dispose={null} rotation={[0, Math.PI / 2, 0]} position={[0, -0.05, 0]}>
+           <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.backPlain.geometry}
+       // material={materials.backMaterial}
+        position={[-0.1909, 0.025, 0]}
+        rotation={[0, 0, -Math.PI / 2]}
+        scale={[0.3769, 0.5899, 0.2453]}
+      >
+        <meshStandardMaterial color={0x0067ff} map={backTexture} roughness={0.25} metalness={0.25} />
+      </mesh>
+      <mesh
+      ref={icLogo}
+        castShadow
+        receiveShadow
+        geometry={nodes.icLogo.geometry}
+        material={materials.LogoMaterial}
+        position={[-0.1099, 0.3342, 0.1564]}
+        rotation={[0.6155, Math.PI / 6, -0.9553]}
+        scale={0.0185}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.frontPlain.geometry}
+        material={materials.frontMaterial}
+        position={[0.2299, 0.025, 0]}
+        rotation={[0, 0, -Math.PI / 2]}
+        scale={[0.4028, 0.6305, 0.2622]}
+      >
         <mesh
-          name="frontPlain"
           castShadow
           receiveShadow
-          geometry={nodes.frontPlain.geometry}
-           material={materials.frontMaterial}
-        //  material={new THREE.MeshNormalMaterial()}
-          position={[0.175, -0.09, 0]}
-          rotation={[0, 0, -Math.PI / 2]}
-          scale={[0.36, 0.6, 0.185]}
-          ref={frontPlain}
+          geometry={nodes.topText.geometry}
+          material={materials.textMaterial}
+          position={[-0.9697, -0.0269, 0.2522]}
+          rotation={[0, 1.5705, 0]}
+          scale={[0.1936, 0.0805, 0.126]}
         />
         <mesh
+          castShadow
+          receiveShadow
+          geometry={nodes.rightText.geometry}
+          material={materials.textMaterial}
+          position={[-0.4984, -0.0269, -0.9651]}
+          scale={[0.126, 0.0805, 0.1936]}
+        />
+        <mesh
+          castShadow
+          receiveShadow
+          geometry={nodes.leftText.geometry}
+          material={materials.textMaterial}
+          position={[0.0155, -0.0269, 0.9628]}
+          rotation={[Math.PI, 0, Math.PI]}
+          scale={[0.126, 0.0805, 0.1936]}
+        />
+      </mesh>
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.iceText.geometry}
+        material={materials.logoIceMaterial}
+        position={[-0.1174, 0.2634, 0.2264]}
+        rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+        scale={0.0331}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Sphere003.geometry}
+        material={materials.sphereOne}
+        position={[0.149, 0.0263, -0.0015]}
+        rotation={[-Math.PI / 2, 1.5549, Math.PI / 2]}
+        scale={[0.082, 0.0834, 0.0072]}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.chainText.geometry}
+        material={materials.textMaterial}
+        position={[-0.1174, 0.2634, 0.1743]}
+        rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+        scale={0.0331}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder001.geometry}
+        material={materials.logoIceMaterial}
+        position={[0.1535, 0.0153, -0.0276]}
+        rotation={[-1.4297, -0.0158, -1.5686]}
+        scale={[-0.0322, -0.0031, -0.0322]}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder003.geometry}
+        material={materials.logoIceMaterial}
+        position={[0.1531, 0.0366, 0.0218]}
+        rotation={[1.7559, -0.0158, -1.5686]}
+        scale={[-0.0322, -0.0031, -0.0322]}
+      />
+      <mesh
         castShadow
         receiveShadow
         geometry={nodes.unknown2.geometry}
         material={materials.unknown2}
-        position={[-0.23, -0.025, 0]}
+        position={[-0.2172, 0, 0]}
         rotation={[Math.PI / 2, 0, Math.PI / 2]}
-        scale={0.61}
+        scale={0.6362}
       />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cube004.geometry}
+        material={materials.MenMetal2}
+        position={[0.1451, 0.0253, -0.0015]}
+        rotation={[-Math.PI / 2, 1.5549, Math.PI / 2]}
+        scale={[0.1106, 0.1106, 0.0125]}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder004.geometry}
+        material={materials.MenMetal2}
+        position={[0.1629, 0.0256, -0.0015]}
+        rotation={[Math.PI / 2, 0.0159, -Math.PI / 2]}
+        scale={[0.0049, 0.0081, 0.0049]}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.FinalStrap1_MenMetal2_0.geometry}
+        material={materials.MenMetal2}
+        position={[0.0128, 0.0218, -0.0015]}
+        rotation={[Math.PI / 2, 0.0309, -Math.PI / 2]}
+        scale={0.0285}
+      >
         <mesh
-          name="icLogo"
           castShadow
           receiveShadow
-          geometry={nodes.icLogo.geometry}
-          material={materials.LogoMaterial}
-          position={[-0.15, 0.31, 0.16]}
-          rotation={[0.62, Math.PI / 6, -0.96]}
-          scale={0.02}
-         // scale={1.5}
-          ref={ iceCube }
-        >
-          <meshStandardMaterial color={0x049ef4}  roughness={ 0.25 } metalness={ 1.0 } side={ THREE.DoubleSide } /> 
-          
-        </mesh>
-        <mesh
-          name="icLogoPlain"
-          castShadow
-          receiveShadow
-          geometry={nodes.icLogo.geometry}
-          material={materials.LogoMaterial}
-          position={[0.4, -0.45, 0]}
-          rotation={[0.62, Math.PI / 7, -0.96]}
-          scale={0}
-         // scale={1.5}
- 
-        >
-          <meshStandardMaterial color={0x049ef4}  roughness={ 0.0 } metalness={ 1.0 } side={ THREE.DoubleSide } /> 
-          
-        </mesh>
-        <mesh
-          name="leftText"
-          castShadow
-          receiveShadow
-          geometry={nodes.leftText.geometry}
-          material={nodes.leftText.material}
-          position={[0.155, -0.075, 0.175]}
-          rotation={[-Math.PI, 0, -Math.PI / 2]}
-          scale={0.035}
-          ref={leftText}
+          geometry={nodes.FinalStrap1_MenMetal_0.geometry}
+          material={materials.MenMetal2}
         />
         <mesh
-          name="topText"
           castShadow
           receiveShadow
-          geometry={nodes.topText.geometry}
-          material={nodes.topText.material}
-          position={[0.15, 0.255, 0.045]}
-          rotation={[Math.PI / 2, -0.1, -Math.PI / 2]}
-          scale={0.035}
-          ref={topText}
+          geometry={nodes.strapClip_MenMetal2_0.geometry}
+          material={materials.MenMetal2}
         />
         <mesh
-          name="rightText"
           castShadow
           receiveShadow
-          geometry={nodes.rightText.geometry}
-          material={nodes.rightText.material}
-          position={[0.155, 0.075, -0.175]}
-          rotation={[0, 0, -Math.PI / 2]}
-          scale={0.035}
-          ref={rightText}
+          geometry={nodes.FinalStrap2_MenMetal2_0.geometry}
+          material={materials.MenMetal2}
         />
         <mesh
-          name="iceText"
           castShadow
           receiveShadow
-          geometry={nodes.iceText.geometry}
-          material={nodes.iceText.material}
-          position={[-0.15, 0.24, 0.22]}
-          rotation={[Math.PI / 2, 0, -Math.PI / 2]}
-          scale={0.03}
+          geometry={nodes.FinalStrap2_MenMetal_0.geometry}
+          material={materials.MenMetal2}
         />
-
-        <mesh
-          name="chainText"
-          castShadow
-          receiveShadow
-          geometry={nodes.chainText.geometry}
-          material={materials.logoChainMaterial}
-          position={[-0.15, 0.24, 0.17]}
-          rotation={[Math.PI / 2, 0, -Math.PI / 2]}
-          scale={0.03}
-        />
-
-    </group>
-  
-        <FinalWatch   />
-
-        <mesh
-          name="plainImg"
-          castShadow
-          receiveShadow
-          geometry={nodes.plainImg.geometry}
-          material={materials.unknown}
-          position={[-0.01, -0.4, 0]}
-          rotation={[0, Math.PI / 2, 0]}
-         // scale={0.4}
-         scale={0}
-          ref={ iceImg }
-        />
-           
-        
-      </group>
-
-
-      <directionalLight ref={dirLight} position={[10, 15, -10]} intensity={ 1.5} color={'blue'} />
-          
-       <ambientLight ref={ambLight} intensity={ 0.75 }/>
+      </mesh>
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Icosphere.geometry}
+        material={materials.MenMetal2}
+        position={[0.1483, 0.0257, -0.0015]}
+        rotation={[-Math.PI / 2, 1.5549, Math.PI / 2]}
+        scale={[0.0926, 0.0874, 0.0136]}
+      />
+      <mesh
+        ref={pointer1}
+        castShadow
+        receiveShadow
+        geometry={nodes.WatchCubeOne.geometry}
+        material={materials.MenMetal2}
+        position={[0.1609, 0.0256, -0.0015]}
+        rotation={[1.2995, 0.0153, -3.1373]}
+        scale={[0.0031, 0.1086, 0.1086]}
+      />
+      <mesh
+       ref={pointer2}
+        castShadow
+        receiveShadow
+        geometry={nodes.WatchCubeSecond.geometry}
+        material={materials.MenMetal2}
+        position={[0.1678, 0.0256, -0.0015]}
+        rotation={[0.7887, 0.0113, -3.1304]}
+        scale={[0.0031, 0.1086, 0.1086]}
+      />
     </group>
   );
 }
 
-useGLTF.preload("/iceTemplate.glb");
+useGLTF.preload("/template.glb");
 
 

@@ -2,10 +2,9 @@ import React, {  Suspense } from "react";
 import './App.css';
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment,  Loader  } from "@react-three/drei";
-import * as THREE from 'three';
-import  Template  from './objects/Template.js';
-
-
+import  {Template}  from './objects/Template.js';
+import {EffectComposer, Bloom } from '@react-three/postprocessing'
+import { ACESFilmicToneMapping } from "three/src/constants";
 function AnimationCanvas() {
 
 
@@ -14,15 +13,12 @@ function AnimationCanvas() {
 
       className="webgl"
       dpr={ window.devicePixelRatio }
-      camera={ {  fov: 70, position: [0, 0, -0.75] , rotation: [0, 0, 0] }}
+      camera={ {  fov: 70, near: 0.001, position: [0, 0, -1] , rotation: [0, 0, 0] }}
       onCreated={({ gl, scene }) => {
-          gl.inputEncoding = THREE.sRGBEncoding
-          gl.outputEncoding = THREE.sRGBEncoding
-          gl.setPixelRatio( window.devicePixelRatio );
+          gl.toneMapping = ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.5;
 
-          // CANVAS BACKGROUND COLOR
-           gl.setClearColor(new THREE.Color('#020207'))
-         // gl.setClearColor(new THREE.Color('#000077'))
+          gl.setPixelRatio( window.devicePixelRatio );
         }}>
 
 
@@ -30,6 +26,10 @@ function AnimationCanvas() {
             <Template />
         </Suspense>
 
+            <ambientLight color={0xffffff} intensity={0.5} />
+            <EffectComposer autoClear={false}>
+              <Bloom intensity={0.1} height={480} luminanceThreshold={0.2} />
+            </EffectComposer>
             <Environment
               background={false} // can be true, false or "only" (which only sets the background) (default: false)
               files="./img/env.hdr"
@@ -40,9 +40,6 @@ function AnimationCanvas() {
             />
              <OrbitControls  />
         
-
-     
-      
       </Canvas>
   );
 }
@@ -60,14 +57,16 @@ function App() {
         // LOADING BAR CSS STYLES
           containerStyles={{
               overflow: 'hidden',
-              borderRadius: "0.75rem"
+              borderRadius: "0.75rem",
+              backgroundColor: 'black'
           }}
           innerStyles={{
             borderRadius: "0rem",
             width: "35vw",
             maxWidth: "35vw",
             minWidth: "325px",
-            height: "100vh"
+            height: "100vh",
+            backgroundColor: 'black'
           }}
           barStyles={{
             borderRadius: "0rem",
@@ -77,9 +76,9 @@ function App() {
             height: "100vh",
 
             // LOADING SCREEN BACKGROUND COLORS
-            backgroundColor: "#0cbaba",
-            backgroundImage: "linear-gradient(30deg, #086187 0%, #520078 85%",
-            
+           // backgroundColor: "#0cbaba",
+           // backgroundImage: "linear-gradient(30deg, #086187 0%, #520078 85%",
+            backgroundColor: 'transparent'
             
           }}
           dataStyles={{ 
