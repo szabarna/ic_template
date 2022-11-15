@@ -1,7 +1,7 @@
 
-Libraries used:
+Model, image dependencies optimized,
 
-npm i @react-three/fiber @react-three/drei three gsap @react-three/postprocessing
+bg.jpg and env.hdr can be further compressed if needed.
 
-After adding the files to the right places and extending the css and main App.js everything should work just fine, if there is still a problem please message me through Carlos!
+the background of the model can be changed via css now, selector: .canvasContainer ( HTML canvas of WebGL )
 
